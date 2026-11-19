@@ -19,6 +19,27 @@ It registers one agent tool, `html_to_ppt`:
 Install the bundle from this directory through **Plugins → Add plugin**, or let an agent run
 `plugin_manager` with `install_bundle` and this directory as the target.
 
+The tool is registered as soon as the plugin activates; because activation happens in the
+installer process, a session that was already open may need a new session to see the tool.
+
+## The `html-to-ppt` skill
+
+Telling the agent "帮我转成 ppt" needs something that recognises that phrasing. That is what the
+companion skill does — it is a short instruction file, not code:
+
+```sh
+mkdir -p ~/.dsh/skills/html-to-ppt
+cp SKILL.md ~/.dsh/skills/html-to-ppt/SKILL.md   # or write it fresh
+```
+
+With the skill installed, the agent matches requests like "帮我转成 ppt", "导出 ppt", "做成幻灯",
+finds the HTML files in the workspace, and calls `html_to_ppt` with sensible arguments. Without it,
+the tool still works, but the agent has to decide on its own that `html_to_ppt` is the right tool.
+
+Put the skill in `~/.dsh/skills` to make it available in every project, or in
+`<project>/.dsh/skills` to scope it to one repository. DSH watches both roots, so no restart is
+needed.
+
 ## Usage
 
 Ask the agent to convert HTML slides, or call the tool directly:

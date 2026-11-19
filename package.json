@@ -17,7 +17,8 @@
     "docs",
     "icon.svg",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "SKILL.md"
   ],
   "dsh": {
     "bundle": {
