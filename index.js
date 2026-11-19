@@ -137,19 +137,28 @@ async function resolveChrome(explicit) {
   throw new Error('html_to_ppt: no Chromium browser found. Pass chromePath or set CHROME_PATH/PUPPETEER_EXECUTABLE_PATH.')
 }
 
-/** Expand python3 launchers under the DSH profile runtimes directory. */
+/** Expand python3 launchers under the DSH runtimes directory. */
 async function dshRuntimePythons() {
   const { readdir } = await import('node:fs/promises')
-  const home = process.env.DSH_PROFILE_DIR || process.env.HOME
+  const home = process.env.HOME
   if (!home) return []
-  const root = join(home, '.dsh', 'dsh-runtimes')
-  let runtimes = []
-  try { runtimes = await readdir(root) } catch { return [] }
+  const roots = [join(home, '.dsh', 'dsh-runtimes')]
+  // A profile directory may sit under the same ~/.dsh tree; include any sibling runtimes root.
+  const profileDir = process.env.DSH_PROFILE_DIR
+  if (profileDir && !profileDir.startsWith(roots[0])) {
+    const parent = dirname(dirname(profileDir))
+    const candidate = join(parent, 'dsh-runtimes')
+    if (candidate !== roots[0]) roots.push(candidate)
+  }
   const found = []
-  for (const runtime of runtimes) {
-    const candidate = join(root, runtime, 'dependencies', 'python', 'bin', 'python3')
-    try { await access(candidate) } catch { continue }
-    found.push(candidate)
+  for (const root of roots) {
+    let runtimes = []
+    try { runtimes = await readdir(root) } catch { continue }
+    for (const runtime of runtimes) {
+      const candidate = join(root, runtime, 'dependencies', 'python', 'bin', 'python3')
+      try { await access(candidate) } catch { continue }
+      found.push(candidate)
+    }
   }
   return found
 }
