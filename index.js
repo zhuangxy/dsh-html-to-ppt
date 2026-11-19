@@ -48,8 +48,8 @@ export const Config = z.object({
   scale: z.natural().min(1).max(16).default(2),
   width: z.natural().min(320).max(16384).default(1600),
   height: z.natural().min(180).max(16384).default(900),
-  chromePath: z.string().optional(),
-  pythonPath: z.string().optional(),
+  chromePath: z.string().required(false),
+  pythonPath: z.string().required(false),
   settleMs: z.natural().min(0).max(60_000).default(1200),
 })
 
@@ -267,7 +267,7 @@ export function apply(ctx, config = {}) {
       + 'The output is a real PowerPoint you can open and edit.',
     parameters: {
       htmls: {
-        type: 'array', items: { type: 'string' }, required: true, minItems: 1,
+        type: 'array', items: { type: 'string' }, required: true,
         description: 'Absolute or workspace-relative paths to the 16:9 HTML files, one per slide in presentation order.',
       },
       output: {
@@ -275,11 +275,11 @@ export function apply(ctx, config = {}) {
         description: 'Output .pptx path. Defaults to "<first-html-basename>.pptx" next to the first HTML.',
       },
       scale: {
-        type: 'integer', min: 1, max: 16,
-        description: 'Resolution multiplier: each page is captured at viewport×(this). Higher values are sharper but make larger files. Default 2.',
+        type: 'integer',
+        description: 'Resolution multiplier from 1 to 16: each page is captured at viewport×(this). Higher values are sharper but make larger files. Default 2.',
       },
-      width: { type: 'integer', min: 320, max: 16384, description: 'CSS viewport width (16:9). Default 1600.' },
-      height: { type: 'integer', min: 180, max: 16384, description: 'CSS viewport height (16:9). Default 900.' },
+      width: { type: 'integer', description: 'CSS viewport width (16:9), 320–16384. Default 1600.' },
+      height: { type: 'integer', description: 'CSS viewport height (16:9), 180–16384. Default 900.' },
       chromePath: { type: 'string', description: 'Optional Chromium executable path. Auto-detected when omitted.' },
       pythonPath: { type: 'string', description: 'Optional Python interpreter that has python-pptx. Auto-detected when omitted.' },
     },
@@ -287,7 +287,6 @@ export function apply(ctx, config = {}) {
       schema: {
         type: 'object',
         additionalProperties: false,
-        required: true,
         properties: {
           output: { type: 'string', required: true, description: 'Absolute path of the generated .pptx.' },
           slides: { type: 'integer', required: true, description: 'Number of slides produced.' },
