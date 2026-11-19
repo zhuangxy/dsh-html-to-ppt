@@ -67,7 +67,7 @@ const { defineTool } = createRequire(requireFromDsh('@deepseek-ai/dsh-tools'))('
 
 /** Runtime configuration; every value is also overridable per call. */
 export const Config = z.object({
-  scale: z.natural().min(1).max(16).default(2),
+  scale: z.natural().min(1).max(16).default(4),
   width: z.natural().min(320).max(16384).default(1600),
   height: z.natural().min(180).max(16384).default(900),
   chromePath: z.string().required(false),
@@ -307,7 +307,7 @@ export function apply(ctx, config = {}) {
       },
       scale: {
         type: 'integer',
-        description: 'Resolution multiplier from 1 to 16: each page is captured at viewport×(this). Higher values are sharper but make larger files. Default 2.',
+        description: 'Resolution multiplier from 1 to 16: each page is captured at viewport×(this). Default 4, which yields 6400×3600 at the default viewport — treat that as the minimum acceptable sharpness for full-screen playback. Raise to 5 or 6 only when asked for more.',
       },
       width: { type: 'integer', description: 'CSS viewport width (16:9), 320–16384. Default 1600.' },
       height: { type: 'integer', description: 'CSS viewport height (16:9), 180–16384. Default 900.' },
@@ -328,7 +328,7 @@ export function apply(ctx, config = {}) {
       presentationMeta: (_args, value) => ({ output: value.output, slides: value.slides, resolution: value.resolution }),
     },
     async execute(args, exec) {
-      const scale = args.scale ?? config.scale ?? 2
+      const scale = args.scale ?? config.scale ?? 4
       const width = args.width ?? config.width ?? 1600
       const height = args.height ?? config.height ?? 900
       const settleMs = config.settleMs ?? 1200
