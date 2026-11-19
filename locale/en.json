@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "HTML to PPT",
+    "description": "Renders 16:9 HTML slides into high-resolution images and assembles them into a PowerPoint (.pptx), one full-bleed slide per HTML file.",
+    "detail": "docs/DETAIL.md"
+  }
+}

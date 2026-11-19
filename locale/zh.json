@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "HTML 转 PPT",
+    "description": "将 16:9 比例的 HTML 幻灯片渲染为高清大图，并逐页放入 PowerPoint（.pptx），每个 HTML 一页满幅幻灯片。",
+    "detail": "docs/DETAIL.md"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "dsh-html-to-ppt",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./scripts/*": "./scripts/*",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "scripts/build_pptx.py",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "docs",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" }
+  }
+}
