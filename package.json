@@ -19,11 +19,13 @@
     "README.md",
     "LICENSE"
   ],
-  "peerDependencies": {
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "dependencies": {
     "@deepseek-ai/dsh-tools": ">=0.2.0-0 <0.3.0",
     "@deepseek-ai/schemastery": "^3.19.0"
-  },
-  "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" }
   }
 }

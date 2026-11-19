@@ -26,24 +26,46 @@ import { mkdtemp, writeFile, rm, access, mkdir } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { basename, join, resolve, isAbsolute, dirname } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import z from '@deepseek-ai/schemastery'
-import { defineTool } from '@deepseek-ai/dsh-tools'
+import { createRequire } from 'node:module'
 
 export const name = 'dsh-html-to-ppt'
 /** the tools service grants the `ctx.tools` registry used to expose the agent tool. */
 export const inject = ['tools']
 
 /**
- * Runtime configuration with sensible defaults; all values are overridable per call.
- * @typedef {Object} Config
- * @property {number} [scale] Default device-scale factor (image resolution multiplier).
- * @property {number} [width] Default CSS viewport width.
- * @property {number} [height] Default CSS viewport height.
- * @property {string} [chromePath] Headless browser executable; auto-detected when omitted.
- * @property {string} [pythonPath] Python interpreter with python-pptx; auto-detected when omitted.
- * @property {number} [settleMs] Frames to wait after load before capture.
+ * Load the host packages from the running DSH installation.
+ *
+ * The plugin is installed as a `link:` directory, so Node's normal resolution
+ * never sees the host's own node_modules. `DSH_INSTALL_DIR` points at the CLI
+ * package inside the installation; walking up from it finds the sibling
+ * @deepseek-ai packages. Ordinary resolution covers a packed install.
  */
+function requireFromDsh(pkg) {
+  const localRequire = createRequire(import.meta.url)
+  const anchors = []
+  // A running Host session sets DSH_INSTALL_DIR; the installer process does not.
+  if (process.env.DSH_INSTALL_DIR) anchors.push(process.env.DSH_INSTALL_DIR)
+  // Desktop and packaged launches expose the archive root through resourcesPath.
+  if (process.resourcesPath) anchors.push(join(process.resourcesPath, 'app.asar', 'dsh', 'node_modules', '@deepseek-ai', 'dsh'))
+  for (const anchor of anchors) {
+    let dir = anchor
+    for (let i = 0; i < 4 && dir; i++) {
+      try { return localRequire.resolve(pkg, { paths: [dir] }) } catch { /* keep looking */ }
+      const parent = dirname(dir)
+      if (parent === dir) break
+      dir = parent
+    }
+  }
+  try { return localRequire.resolve(pkg) } catch { /* fall through */ }
+  throw new Error(
+    `dsh-html-to-ppt: cannot resolve "${pkg}" from the DSH installation (looked under ${anchors.join(', ') || 'no anchor'}).`,
+  )
+}
 
+const z = createRequire(requireFromDsh('@deepseek-ai/schemastery'))('@deepseek-ai/schemastery')
+const { defineTool } = createRequire(requireFromDsh('@deepseek-ai/dsh-tools'))('@deepseek-ai/dsh-tools')
+
+/** Runtime configuration; every value is also overridable per call. */
 export const Config = z.object({
   scale: z.natural().min(1).max(16).default(2),
   width: z.natural().min(320).max(16384).default(1600),
